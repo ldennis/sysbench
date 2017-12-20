@@ -1,0 +1,22 @@
+#!/bin/bash
+
+tst=$1
+thd=$2
+if [[ "x$tst" == "x" ]]; then
+    echo "need a test name"
+fi
+
+if [[ "x$thd" == "x" ]]; then
+    thd=20
+fi
+
+echo "prepare"
+sysbench --db-driver=comdb2 --comdb2-db=ldengdb --comdb2-host=local --auto_inc=off --time=30 --threads=$thd $tst prepare
+echo "run"
+sysbench --db-driver=comdb2 --comdb2-db=ldengdb --comdb2-host=local --auto_inc=off --time=90 --threads=$thd $tst run
+if [[ $? == 0 ]]; then
+    echo "cleanup"
+    sysbench --db-driver=comdb2 --comdb2-db=ldengdb --comdb2-host=local --auto_inc=off --time=30 --threads=$thd $tst cleanup
+    exit 0
+fi
+exit 1

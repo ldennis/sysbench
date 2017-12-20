@@ -1,0 +1,12 @@
+#!/bin/bash                        
+
+tst=$1
+if [[ "x$tst" == "x" ]]; then
+    echo "need a test name"
+fi
+while true; do                     
+    ./runit $tst 80
+    if [[ $? != 0 ]]; then         
+        break                      
+    fi                             
+done 

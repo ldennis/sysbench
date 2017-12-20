@@ -233,12 +233,15 @@ static db_error_t comdb2_drv_execute(db_stmt_t *stmt, db_result_t *rs)
         }
 
         rc = cdb2_run_statement(conn_hndl, stmt->query);
-        if (rc) {
-            log_text(LOG_FATAL, "cdb2_run_statement() failed (rc = %d)", rc);
+        if (rc == CDB2ERR_VERIFY_ERROR || rc == CDB2ERR_DUPLICATE) {
+            rc = 0;
+        } else if (rc) {
+            log_text(LOG_FATAL, "%s:%d cdb2_run_statement() failed (rc = %d)", __func__, __LINE__, rc);
             cdb2_close(conn_hndl);
             return 1;
         }
 
+#if 0
         rc = cdb2_get_effects(conn_hndl, &effects);
         if (rc) {
             log_text(LOG_FATAL, "cdb2_get_effects() failed (rc = %d)", rc);
@@ -261,6 +264,7 @@ static db_error_t comdb2_drv_execute(db_stmt_t *stmt, db_result_t *rs)
                      effects.num_updated, effects.num_deleted,
                      effects.num_inserted);
         }
+#endif
 
         rc = cdb2_clearbindings(conn_hndl);
         if (rc) {
@@ -363,12 +367,15 @@ static db_error_t comdb2_drv_query(db_conn_t *sb_conn, const char *query,
     }
 
     rc = cdb2_run_statement(conn_hndl, query);
-    if (SB_UNLIKELY(rc != 0)) {
-        log_text(LOG_FATAL, "cdb2_run_statement() failed (rc = %d)", rc);
+    if (rc == CDB2ERR_VERIFY_ERROR || rc == CDB2ERR_DUPLICATE) {
+        rc = 0;
+    } else if (rc) {
+        log_text(LOG_FATAL, "%s:%d cdb2_run_statement() failed (rc = %d)", __func__, __LINE__, rc);
         cdb2_close(conn_hndl);
         return DB_ERROR_FATAL;
     }
 
+#if 0
     rc = cdb2_get_effects(conn_hndl, &effects);
     if (rc) {
         log_text(LOG_FATAL, "cdb2_get_effects() failed (rc = %d)", rc);
@@ -391,6 +398,7 @@ static db_error_t comdb2_drv_query(db_conn_t *sb_conn, const char *query,
                  effects.num_updated, effects.num_deleted,
                  effects.num_inserted);
     }
+#endif
 
     /* Retrieve all the records */
     while (CDB2_OK == (rc = cdb2_next_record(conn_hndl)))
@@ -400,7 +408,7 @@ static db_error_t comdb2_drv_query(db_conn_t *sb_conn, const char *query,
     case CDB2_OK_DONE:
         break; /* Result set exhausted */
     default:
-        log_text(LOG_FATAL, "cdb2_run_statement() failed (rc = %d)", rc);
+        log_text(LOG_FATAL, "%s:%d cdb2_run_statement() failed (rc = %d)", __func__, __LINE__, rc);
         cdb2_close(conn_hndl);
         return DB_ERROR_FATAL;
     }
