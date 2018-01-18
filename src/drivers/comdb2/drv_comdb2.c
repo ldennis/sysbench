@@ -233,7 +233,7 @@ static db_error_t comdb2_drv_execute(db_stmt_t *stmt, db_result_t *rs)
         }
 
         rc = cdb2_run_statement(conn_hndl, stmt->query);
-        if (rc == CDB2ERR_VERIFY_ERROR || rc == CDB2ERR_DUPLICATE) {
+        if (rc == CDB2ERR_DUPLICATE) {
             rc = 0;
         } else if (rc) {
             log_text(LOG_FATAL, "%s:%d cdb2_run_statement() failed (rc = %d)", __func__, __LINE__, rc);
@@ -367,7 +367,7 @@ static db_error_t comdb2_drv_query(db_conn_t *sb_conn, const char *query,
     }
 
     rc = cdb2_run_statement(conn_hndl, query);
-    if (rc == CDB2ERR_VERIFY_ERROR || rc == CDB2ERR_DUPLICATE) {
+    if (rc == CDB2ERR_DUPLICATE) {
         rc = 0;
     } else if (rc) {
         log_text(LOG_FATAL, "%s:%d cdb2_run_statement() failed (rc = %d)", __func__, __LINE__, rc);

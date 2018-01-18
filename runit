@@ -20,3 +20,5 @@ if [[ $? == 0 ]]; then
     exit 0
 fi
 exit 1
+
+# for t in 1 4 8 16 32 64; do ./runit oltp_write_only $t > results/oltp_write_only.rowlocks_retries.$t ; done
